@@ -8,6 +8,14 @@ Supports single requests as well as streaming via Server Sent Events.
 
 Subject to change.
 
+# Usage
+
+```
+;;Add git dependency to deps.edn
+clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
+         :sha     "921306e9b7ce595c35cc73e56d97f5d5a8e64d74"}
+```
+
 ```clojure
 
 (require '[clojiex.core :as iex])
@@ -27,7 +35,7 @@ A "client" is just a map containing the following keys
 
 `clojiex.core/get` takes a client, a vector of URL segments which correspond a GET endpoint in the iex api (you can use keywords or strings for each segment) a map of query params, and a callback function to run on the resulting data.
 
-```
+```clojure
 (iex/get iex-client
          [:stock "SPY" :chart] ;;represents "GET /stock/SPY/chart/"
          {:range "1m"}
