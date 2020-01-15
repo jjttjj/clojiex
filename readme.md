@@ -1,6 +1,6 @@
 # clojiex 
 
-A very lightweight Clojure wrapper for [IEX Cloud](https://iexcloud.io/s/6292bbcc) (referral link). 
+A very lightweight Clojure wrapper for [IEX Cloud](https://iexcloud.io/docs/api/). 
 
 Works in both clojure and clojurescript. 
 
@@ -21,6 +21,10 @@ Subject to change.
 
 # Examples
 
+For a list of available endpoints, see the [IEX docs](https://iexcloud.io/docs/api/). 
+
+You will need an api token. [Sign up for IEX Cloud](https://iexcloud.io/s/6292bbcc) to get one. This is a referral link. You don't need to provide any payment information to sign up and get an api token you can start using. Just an email and password. You get a decent amount of free data each month and unlimited sandbox api usage.
+
 ```clojure
 ;;Add git dependency to deps.edn
 clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
@@ -33,7 +37,7 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 
 ```
 
-First define a client
+First define a client.
 
 ```clojure
 (def iex-client
