@@ -8,6 +8,10 @@ Supports single requests as well as streaming via Server Sent Events.
 
 Subject to change.
 
+For a list of available endpoints, see the [IEX docs](https://iexcloud.io/docs/api/). 
+
+You will need an api token. [Sign up for IEX Cloud](https://iexcloud.io/s/6292bbcc) to get one. This is a referral link. You don't need to provide any payment information to sign up and get an api token you can start using. Just an email and password. You get a decent amount of free data each month and unlimited sandbox api usage.
+
 # termonology
 
 
@@ -20,10 +24,6 @@ Subject to change.
 | callback  | A function to run on receiving data. Is called once on the result of a `get` request and on each new value from a `stream` |                                               |
 
 # Examples
-
-For a list of available endpoints, see the [IEX docs](https://iexcloud.io/docs/api/). 
-
-You will need an api token. [Sign up for IEX Cloud](https://iexcloud.io/s/6292bbcc) to get one. This is a referral link. You don't need to provide any payment information to sign up and get an api token you can start using. Just an email and password. You get a decent amount of free data each month and unlimited sandbox api usage.
 
 ```clojure
 ;;Add git dependency to deps.edn
