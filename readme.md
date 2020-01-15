@@ -8,9 +8,20 @@ Supports single requests as well as streaming via Server Sent Events.
 
 Subject to change.
 
-# Usage
+# termonology
 
-```
+
+| term      | form                                                                                                                       |
+|-----------|----------------------------------------------------------------------------------------------------------------------------|
+| client    | A map containing the keys `:version`, `:url-base`, `:sse-url-base` and `token`.                                            |
+| request   | `[<segment>+ <query-map>?]` eg `[:stock "SPY" :chart]` or `[:stock "SPY" :chart {:range "1y"}]`                            |
+| segment   | A keyword or string. Turns into a path parameter. The combined segments correspond to the IEX api endpoint                 |
+| query-map | A map which turns into query parameters for the endpoint.                                                                  |
+| callback  | A function to run on receiving data. Is called once on the result of a `get` request and on each new value from a `stream` |                                               |
+
+# Examples
+
+```clojure
 ;;Add git dependency to deps.edn
 clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
          :sha     "921306e9b7ce595c35cc73e56d97f5d5a8e64d74"}
@@ -22,8 +33,7 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 
 ```
 
-
-A "client" is just a map containing the following keys
+First define a client
 
 ```clojure
 (def iex-client
@@ -33,7 +43,7 @@ A "client" is just a map containing the following keys
    :token        "<your IEX pub token>"})
 ```
 
-`clojiex.core/get` takes a client, a vector of URL segments which correspond a GET endpoint in the iex api (you can use keywords or strings for each segment) a map of query params, and a callback function to run on the resulting data.
+`clojiex.core/get` takes a client, a request and a callback function to run on the resulting data.
 
 ```clojure
 (iex/get iex-client
@@ -43,7 +53,7 @@ A "client" is just a map containing the following keys
 ```
 
 
-You can stream via SSE with the `clojiex.core/stream` function, which also takes a vector of segments, a query param map and a callback to run on each result: 
+You can stream via SSE with the `clojiex.core/stream` function, which also takes a request and a callback to run on each result: 
 
 ```clojure
 (def ticker (iex/stream
