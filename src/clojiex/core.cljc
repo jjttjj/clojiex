@@ -23,20 +23,25 @@
     (str/join "/" (map name segs))
     (param-str (assoc qmap :token (:token client))))))
 
-(defn get [client segs qmap cb]
-  #?(:clj
-     (http/get (endpoint-str client segs qmap)
-               {:cookie-policy :standard
-                :async?        true}
-               #(-> % :body (json/parse-string true) cb)
-               #(throw %))
-     :cljs
-     (xhr/send (endpoint-str client segs qmap)
-               (fn [e]
-                 (-> (.-target e)
-                     .getResponseJson
-                     (js->clj :keywordize-keys true)
-                     cb)))))
+(defn parse-req [req]
+  (let [[segs [qmap]] (split-with (complement map?) req)]
+    [segs qmap]))
+
+(defn get [client req cb]
+  (let [[segs qmap] (parse-req req)]
+    #?(:clj
+       (http/get (endpoint-str client segs qmap)
+                 {:cookie-policy :standard
+                  :async?        true}
+                 #(-> % :body (json/parse-string true) cb)
+                 #(throw %))
+       :cljs
+       (xhr/send (endpoint-str client segs qmap)
+                 (fn [e]
+                   (-> (.-target e)
+                       .getResponseJson
+                       (js->clj :keywordize-keys true)
+                       cb))))))
 
 #?(:clj (def event-mask (re-pattern (str "(?s).+?\r\n\r\n"))))
 
@@ -75,29 +80,30 @@
        
        event-stream)))
 
-(defn stream [client segs qmap cb]
-  #?(:clj
-     (event-source (endpoint-str client segs qmap true)
-                   (fn [x]
-                     (let [msg
-                           (reduce-kv (fn [m k v]
-                                        (assoc m k (json/parse-string v true)))
-                                      {} x)]
-                       #_
-                       (when (not-empty (dissoc msg :data))
-                         (log/warn "Non :data key in event source message"))
-                       (some-> msg :data first cb))))
-     :cljs
-     (let [es (js/EventSource. (endpoint-str client segs qmap true))]
-       (set! (.-onmessage es)
-             (fn [e]
-               (some-> e
-                       .-data
-                       js/JSON.parse
-                       (js->clj :keywordize-keys true)
-                       first
-                       cb)))
-       es)))
+(defn stream [client req cb]
+  (let [[segs qmap] (parse-req req)]
+    #?(:clj
+       (event-source (endpoint-str client segs qmap true)
+                     (fn [x]
+                       (let [msg
+                             (reduce-kv (fn [m k v]
+                                          (assoc m k (json/parse-string v true)))
+                                        {} x)]
+                         #_
+                         (when (not-empty (dissoc msg :data))
+                           (log/warn "Non :data key in event source message"))
+                         (some-> msg :data first cb))))
+       :cljs
+       (let [es (js/EventSource. (endpoint-str client segs qmap true))]
+         (set! (.-onmessage es)
+               (fn [e]
+                 (some-> e
+                         .-data
+                         js/JSON.parse
+                         (js->clj :keywordize-keys true)
+                         first
+                         cb)))
+         es))))
 
 (defn close [event-source]
   (.close event-source))
