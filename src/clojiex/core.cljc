@@ -25,21 +25,26 @@
     (str/join "/" (map name segs))
     (param-str (assoc qmap :token (:token client))))))
 
-(defn get* [client segs qmap cb]
-  #?(:clj
-     (http/get (endpoint-str client segs qmap)
-               {:cookie-policy :standard
-                :async?        true}
-               #(-> % :body (json/parse-string true) cb)
-               #(throw %))
-     :cljs
-     ;;todo: on error throw
-     (xhr/send (endpoint-str client segs qmap)
-               (fn [e]
-                 (-> (.-target e)
-                     .getResponseJson
-                     (js->clj :keywordize-keys true)
-                     cb)))))
+(defn get*
+  ([client segs qmap]
+   #?(:cljs (assert false "Must provide callback for get request")
+      :clj (get* client segs qmap nil)))
+  ([client segs qmap cb]
+   #?(:clj
+      (cond-> (http/get (endpoint-str client segs qmap)
+                        {:cookie-policy :standard
+                         :async?        (when cb true)}
+                        (when cb #(-> % :body (json/parse-string true) cb))
+                        (when cb #(throw %)))
+        (not cb) (-> :body (json/parse-string true)))
+      :cljs
+      ;;todo: on error throw
+      (xhr/send (endpoint-str client segs qmap)
+                (fn [e]
+                  (-> (.-target e)
+                      .getResponseJson
+                      (js->clj :keywordize-keys true)
+                      cb))))))
 
 #?(:clj (def event-mask (re-pattern (str "(?s).+?\r\n\r\n"))))
 
@@ -114,9 +119,13 @@
     [(-> op namespace (str/split #"\.") (conj (name op)))
      args]))
 
-(defn get [client req cb]
-  (let [[segs qmap] (segs+qmap (first req) (second req))]
-    (get* client segs qmap cb)))
+(defn get
+  ([client req]
+   #?(:cljs (assert false "Must provide callback for get request")
+      :clj  (get client req nil)))
+  ([client req cb]
+   (let [[segs qmap] (segs+qmap (first req) (second req))]
+     (get* client segs qmap cb))))
 
 (defn sse [client req cb]
   (let [[segs qmap] (segs+qmap (first req) (second req))]
