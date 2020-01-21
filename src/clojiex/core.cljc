@@ -1,8 +1,10 @@
 (ns clojiex.core
   (:refer-clojure :exclude [get])
   (:require
+   [clojure.core :as core]
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
+   [clojiex.meta :as meta]
    #?@(:clj
        [[cheshire.core :as json]
         [clj-http.client :as http]
@@ -23,7 +25,7 @@
     (str/join "/" (map name segs))
     (param-str (assoc qmap :token (:token client))))))
 
-(defn get [client segs qmap cb]
+(defn get* [client segs qmap cb]
   #?(:clj
      (http/get (endpoint-str client segs qmap)
                {:cookie-policy :standard
@@ -31,6 +33,7 @@
                #(-> % :body (json/parse-string true) cb)
                #(throw %))
      :cljs
+     ;;todo: on error throw
      (xhr/send (endpoint-str client segs qmap)
                (fn [e]
                  (-> (.-target e)
@@ -75,7 +78,8 @@
        
        event-stream)))
 
-(defn stream [client segs qmap cb]
+;;todo: on error throw
+(defn sse* [client segs qmap cb]
   #?(:clj
      (event-source (endpoint-str client segs qmap true)
                    (fn [x]
@@ -101,3 +105,19 @@
 
 (defn close [event-source]
   (.close event-source))
+
+
+(defn segs+qmap [op args]
+  (if-let [kw-segs (meta/op->kw-segs op)]
+    [(->> kw-segs (keep #(if (keyword? %) (core/get args %) %)))
+     (->> kw-segs (filter keyword?) (reduce dissoc args))]
+    [(-> op namespace (str/split #"\.") (conj (name op)))
+     args]))
+
+(defn get [client req cb]
+  (let [[segs qmap] (segs+qmap (first req) (second req))]
+    (get* client segs qmap cb)))
+
+(defn sse [client req cb]
+  (let [[segs qmap] (segs+qmap (first req) (second req))]
+    (sse* client segs qmap cb)))
