@@ -31,8 +31,8 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 ```
 
 ```clojure
-
-(require '[clojiex.core :as iex])
+(ns dev
+  (:require [clojiex.core :as iex]))
 
 (def iex-version "stable")
 
@@ -40,7 +40,7 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 (def iex-base "https://sandbox.iexapis.com")
 (def iex-sse-base "https://sandbox-sse.iexapis.com")
 
-(defn client []
+(def client
   {:url-base     iex-base
    :sse-url-base iex-sse-base
    :version      iex-version
@@ -48,13 +48,13 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 
 ;;synchronous calls, without callback, work in clojure onl
 (def historical-bars
-  (iex/get (client) [:stock/chart {:symbol "SPY" :range "1m"}]))
+  (iex/get client [:stock/chart {:symbol "SPY" :range "1m"}]))
 
 ;;async call works in clojure and clojurescript
-(iex/get (client) [:stock/chart {:symbol "SPY" :range "1m"}] println)
+(iex/get client [:stock/chart {:symbol "SPY" :range "1m"}] println)
 
 ;;start streaming data
-(def st (iex/sse (client) [:tops {:symbols "SPY"}] #(prn "stream value " %)))
+(def st (iex/sse client [:tops {:symbols "SPY"}] #(prn "stream value " %)))
 
 ;;close stream
 (iex/close st)
