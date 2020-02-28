@@ -14,60 +14,50 @@ You will need an api token. [Sign up for IEX Cloud](https://iexcloud.io/s/6292bb
 
 # termonology
 
-
-| term      | form                                                                                                                       |
-|-----------|----------------------------------------------------------------------------------------------------------------------------|
-| client    | A map containing the keys `:version`, `:url-base`, `:sse-url-base` and `token`.                                            |
-| request   | `[<segment>+ <query-map>?]` eg `[:stock "SPY" :chart]` or `[:stock "SPY" :chart {:range "1y"}]`                            |
-| segment   | A keyword or string. Turns into a path parameter. The combined segments correspond to the IEX api endpoint                 |
-| query-map | A map which turns into query parameters for the endpoint.                                                                  |
-| callback  | A function to run on receiving data. Is called once on the result of a `get` request and on each new value from a `stream` |                                               |
+| term         | form                                                                                                                       |
+|--------------|----------------------------------------------------------------------------------------------------------------------------|
+| client       | A map containing the keys `:version`, `:url-base`, `:sse-url-base` and `token`.                                            |
+| request      | `[endpoint-key arg-map]` eg. `[:stock/chart {:symbol "SPY" :range "1y"}]` |
+| endpoint-key | A keyword which correspond to an IEX api endpoint with all path params removed. Path params should instead be provided in the `arg-map`, using a keyword name which corresponds to the path param name used in the iex documentation.                  |
+| arg-map | A map of keyword names to values, containing all path and query params for the request.|
+| callback  | A function to run on received data. Is called once on the result of a `get` request and on each new value from a `sse`. Note: callbacks are optional for `get` requests on clojure. Omitting it will synchronously return the result. On clojurescript they are requred. |
 
 # Examples
 
 ```clojure
 ;;Add git dependency to deps.edn
 clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
-         :sha     "921306e9b7ce595c35cc73e56d97f5d5a8e64d74"}
+         :sha     "<latest git sha for this project>"}
 ```
 
 ```clojure
 
 (require '[clojiex.core :as iex])
 
-```
+(def iex-version "stable")
 
-First define a client.
+(def pub-token "<pub-token>")
+(def iex-base "https://sandbox.iexapis.com")
+(def iex-sse-base "https://sandbox-sse.iexapis.com")
 
-```clojure
-(def iex-client
-  {:version      "stable"
-   :url-base     "https://sandbox.iexapis.com"
-   :sse-url-base "https://sandbox-sse.iexapis.com"
-   :token        "<your IEX pub token>"})
-```
+(defn client []
+  {:url-base     iex-base
+   :sse-url-base iex-sse-base
+   :version      iex-version
+   :token        pub-token})
 
-`clojiex.core/get` takes a client, a request and a callback function to run on the resulting data.
+;;synchronous calls, without callback, work in clojure onl
+(def historical-bars
+  (iex/get (client) [:stock/chart {:symbol "SPY" :range "1m"}]))
 
-```clojure
-(iex/get iex-client
-         [:stock "SPY" :chart] ;;represents "GET /stock/SPY/chart/"
-         {:range "1m"}
-         prn)
-```
+;;async call works in clojure and clojurescript
+(iex/get (client) [:stock/chart {:symbol "SPY" :range "1m"}] println)
 
+;;start streaming data
+(def st (iex/sse (client) [:tops {:symbols "SPY"}] #(prn "stream value " %)))
 
-You can stream via SSE with the `clojiex.core/stream` function, which also takes a request and a callback to run on each result: 
-
-```clojure
-(def ticker (iex/stream
-             iex-client
-             [:TOPS]
-             {:symbols "SPY"}
-             #(prn "new server sent event:" %)))
-
-;;call close to stop the stream
-(iex/close ticker)
+;;close stream
+(iex/close st)
 
 ```
 
