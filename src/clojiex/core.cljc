@@ -116,7 +116,9 @@
   (if-let [kw-segs (meta/op->kw-segs op)]
     [(->> kw-segs (keep #(if (keyword? %) (core/get args %) %)))
      (->> kw-segs (filter keyword?) (reduce dissoc args))]
-    [(-> op namespace (str/split #"\.") (conj (name op)))
+    [(if-let [ns (namespace op)]
+       (-> ns (str/split #"\.") (conj (name op)))
+       [(name op)])
      args]))
 
 (defn get
