@@ -1,17 +1,11 @@
 (ns dev
   (:require [dev.jt.clojiex :as iex]))
 
-(def iex-version "stable")
-
-(def pub-token "<iex pub token>")
-(def iex-base "https://sandbox.iexapis.com")
-(def iex-sse-base "https://sandbox-sse.iexapis.com")
-
 (def client
-  {:url-base     iex-base
-   :sse-url-base iex-sse-base
-   :version      iex-version
-   :token        pub-token})
+  {:url-base     "https://sandbox.iexapis.com"
+   :sse-url-base "https://sandbox-sse.iexapis.com"
+   :version      "stable"
+   :token        "<iex pub token>"})
 
 ;;synchronous calls, without callback, work in clojure only
 (def historical-bars
