@@ -26,25 +26,19 @@ You will need an api token. [Sign up for IEX Cloud](https://iexcloud.io/s/6292bb
 
 ```clojure
 ;;Add git dependency to deps.edn
-clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
-         :sha     "<latest git sha for this project>"}
+{dev.jt/clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
+                 :sha     "<latest git sha for this project>"}}
 ```
 
 ```clojure
 (ns dev
   (:require [dev.jt.clojiex :as iex]))
 
-(def iex-version "stable")
-
-(def pub-token "<pub-token>")
-(def iex-base "https://sandbox.iexapis.com")
-(def iex-sse-base "https://sandbox-sse.iexapis.com")
-
 (def client
-  {:url-base     iex-base
-   :sse-url-base iex-sse-base
-   :version      iex-version
-   :token        pub-token})
+  {:url-base     "https://sandbox.iexapis.com"
+   :sse-url-base "https://sandbox-sse.iexapis.com"
+   :version      "stable"
+   :token        "<iex pub token>"})
 
 ;;synchronous calls, without callback, work in clojure only
 (def historical-bars
@@ -58,8 +52,17 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 
 ;;close stream
 (iex/close st)
-
 ```
+
+## Lower level api
+
+ `get` and `sse` allow for a more convenient request data structure to be passed, but you can also use the lower level functions `get*` and `sse*` which take a client followed by a sequence of path segments, followed by a map of query params, followed by the callback. 
+ 
+```
+(iex/get* client ["stock" "SPY" "chart"] {:range "1m"} println)
+```
+ 
+ This might be necessary in some cases. The convenience functions are enabled by parsing the IEX documentation and might not cover 100% of the cases. If you find a case that doesn't work, feel free to open up an issue.
 
 # TODO 
 
