@@ -46,7 +46,7 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
    :version      iex-version
    :token        pub-token})
 
-;;synchronous calls, without callback, work in clojure onl
+;;synchronous calls, without callback, work in clojure only
 (def historical-bars
   (iex/get client [:stock/chart {:symbol "SPY" :range "1m"}]))
 
