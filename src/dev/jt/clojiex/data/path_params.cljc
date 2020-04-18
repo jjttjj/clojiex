@@ -1,4 +1,4 @@
-(ns clojiex.data.path-params)
+(ns dev.jt.clojiex.data.path-params)
 
 (def op->kw-segs
   {:account/usage                         ["account" "usage" :type]

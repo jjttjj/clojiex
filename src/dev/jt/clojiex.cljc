@@ -1,10 +1,10 @@
-(ns clojiex.core
+(ns dev.jt.clojiex
   (:refer-clojure :exclude [get])
   (:require
    [clojure.core :as core]
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
-   [clojiex.data.path-params :as path]
+   [dev.jt.clojiex.data.path-params :as path]
    #?@(:clj
        [[cheshire.core :as json]
         [clj-http.client :as http]

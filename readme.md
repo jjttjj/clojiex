@@ -32,7 +32,7 @@ clojiex {:git/url "https://github.com/jjttjj/clojiex.git"
 
 ```clojure
 (ns dev
-  (:require [clojiex.core :as iex]))
+  (:require [dev.jt.clojiex :as iex]))
 
 (def iex-version "stable")
 
