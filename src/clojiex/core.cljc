@@ -4,7 +4,7 @@
    [clojure.core :as core]
    [clojure.string :as str]
    [clojure.spec.alpha :as s]
-   [clojiex.meta :as meta]
+   [clojiex.data.path-params :as path]
    #?@(:clj
        [[cheshire.core :as json]
         [clj-http.client :as http]
@@ -113,7 +113,7 @@
 
 
 (defn segs+qmap [op args]
-  (if-let [kw-segs (meta/op->kw-segs op)]
+  (if-let [kw-segs (path/op->kw-segs op)]
     [(->> kw-segs (keep #(if (keyword? %) (core/get args %) %)))
      (->> kw-segs (filter keyword?) (reduce dissoc args))]
     [(if-let [ns (namespace op)]
